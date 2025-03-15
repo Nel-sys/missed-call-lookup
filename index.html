@@ -1,1 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missed Call Number Search</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Missed Call Number Search</h1>
+        
+        <form id="search-form">
+            <input type="text" id="search-number" placeholder="Enter Phone Number" required>
+            <button type="submit">Search</button>
+        </form>
+        
+        <div id="search-results">
+            <!-- Search results will appear here -->
+        </div>
+
+        <div id="comments-section">
+            <h2>Leave a Comment</h2>
+            <textarea id="comment-text" placeholder="Write a comment..." rows="4" required></textarea>
+            <button id="submit-comment">Submit Comment</button>
+        </div>
+
+        <h2>Search History</h2>
+        <ul id="history-list">
+            <!-- Search history will be displayed here -->
+        </ul>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
 
