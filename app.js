@@ -10,15 +10,27 @@ const commentTextArea = document.getElementById("comment-text");
 const submitCommentBtn = document.getElementById("submit-comment");
 const historyList = document.getElementById("history-list");
 
-// Check if the user is logged in
+// Check if the user is logged in and get user details
 let userId = null;
 supabase.auth.onAuthStateChange((event, session) => {
     if (session?.user) {
-        userId = session.user.id; // Store the user ID
+        userId = session.user.id; // Store the user ID for submitting comments
     } else {
         alert('You need to log in to submit comments');
     }
 });
+
+// Handle login and sign-up
+const loginUser = async (email, password) => {
+    const { user, error } = await supabase.auth.signIn({
+        email: email,
+        password: password
+    });
+    if (error) {
+        console.error('Login error:', error.message);
+    }
+    return user;
+};
 
 // Handle search form submission
 searchForm.addEventListener("submit", async (e) => {
@@ -26,11 +38,15 @@ searchForm.addEventListener("submit", async (e) => {
     const phoneNumber = searchNumberInput.value.trim();
 
     if (phoneNumber) {
-        const response = await fetch(`/search-number?phone=${phoneNumber}`);
-        const result = await response.json();
+        const { data, error } = await supabase
+            .from('phone_comments')
+            .select('phone, comment')
+            .eq('phone', phoneNumber);
 
-        if (result.success) {
-            displaySearchResults(result.data);
+        if (error) {
+            console.error('Error fetching comments:', error.message);
+        } else {
+            displaySearchResults({ phone: phoneNumber, comments: data.map(d => d.comment) });
         }
 
         saveSearchHistory(phoneNumber);
@@ -43,23 +59,18 @@ submitCommentBtn.addEventListener("click", async () => {
     const phoneNumber = searchNumberInput.value.trim();
 
     if (comment && phoneNumber && userId) {
-        const response = await fetch('/submit-comment', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                phone: phoneNumber,
-                comment: comment,
-                user_id: userId  // Use authenticated user ID
-            })
-        });
+        const { data, error } = await supabase
+            .from('phone_comments')
+            .insert([{ phone: phoneNumber, comment: comment, user_id: userId }]);
 
-        const result = await response.json();
-        if (result.success) {
+        if (error) {
+            console.error('Error submitting comment:', error.message);
+        } else {
             alert("Comment submitted!");
             commentTextArea.value = ''; // Clear comment box
         }
+    } else {
+        alert('Please log in to submit a comment.');
     }
 });
 
@@ -75,7 +86,7 @@ function displaySearchResults(data) {
     `;
 }
 
-// Save search history
+// Save search history (just appends to a list in UI)
 function saveSearchHistory(phone) {
     const historyItem = document.createElement("li");
     historyItem.textContent = phone;
