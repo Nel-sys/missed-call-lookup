@@ -1,5 +1,7 @@
-// Initialize Supabase
-const supabase = supabase.createClient('https://mrshshpjrspcsfjfydnw.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yc2hzaHBqcnNwY3NmamZ5ZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyMTMsImV4cCI6MjA1NzcyNzIxM30.207BZGQvM9MJdQTPxfOAxYLYAHM5pKMaZ36WnBwGQR8');
+// Initialize Supabase client
+const supabaseUrl = 'https://mrshshpjrspcsfjfydnw.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yc2hzaHBqcnNwY3NmamZ5ZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyMTMsImV4cCI6MjA1NzcyNzIxM30.207BZGQvM9MJdQTPxfOAxYLYAHM5pKMaZ36WnBwGQR8';
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 const searchForm = document.getElementById("search-form");
 const searchNumberInput = document.getElementById("search-number");
@@ -8,20 +10,29 @@ const commentTextArea = document.getElementById("comment-text");
 const submitCommentBtn = document.getElementById("submit-comment");
 const historyList = document.getElementById("history-list");
 
+// Check if the user is logged in
+let userId = null;
+supabase.auth.onAuthStateChange((event, session) => {
+    if (session?.user) {
+        userId = session.user.id; // Store the user ID
+    } else {
+        alert('You need to log in to submit comments');
+    }
+});
+
 // Handle search form submission
 searchForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const phoneNumber = searchNumberInput.value.trim();
-    
+
     if (phoneNumber) {
-        // Fetch number details (for now, we'll mock this)
-        const result = await fetchPhoneNumberDetails(phoneNumber);
+        const response = await fetch(`/search-number?phone=${phoneNumber}`);
+        const result = await response.json();
 
         if (result.success) {
             displaySearchResults(result.data);
         }
 
-        // Save the search history
         saveSearchHistory(phoneNumber);
     }
 });
@@ -31,61 +42,40 @@ submitCommentBtn.addEventListener("click", async () => {
     const comment = commentTextArea.value.trim();
     const phoneNumber = searchNumberInput.value.trim();
 
-    if (comment && phoneNumber) {
-        // Insert the comment into Supabase
-        const { data, error } = await supabase
-            .from('phone_comments') // Your table name
-            .insert([
-                { phone_number: phoneNumber, comment: comment }
-            ]);
+    if (comment && phoneNumber && userId) {
+        const response = await fetch('/submit-comment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                phone: phoneNumber,
+                comment: comment,
+                user_id: userId  // Use authenticated user ID
+            })
+        });
 
-        if (error) {
-            console.error("Error submitting comment:", error);
-            alert("There was an error submitting your comment.");
-        } else {
-            alert("Comment submitted successfully!");
-            commentTextArea.value = ''; // Clear the comment box
+        const result = await response.json();
+        if (result.success) {
+            alert("Comment submitted!");
+            commentTextArea.value = ''; // Clear comment box
         }
     }
 });
 
-// Fetch phone number details (mocking a response)
-async function fetchPhoneNumberDetails(phoneNumber) {
-    // Here you would fetch details from an API or database.
-    // For now, we are simulating the response:
-    return {
-        success: true,
-        data: {
-            phone: phoneNumber,
-            comments: []
-        }
-    };
-}
-
-// Display search results (phone number and comments)
-async function displaySearchResults(data) {
+// Display search results
+function displaySearchResults(data) {
     searchResultsDiv.style.display = 'block';
     searchResultsDiv.innerHTML = `
         <p><strong>Phone Number:</strong> ${data.phone}</p>
         <p><strong>Previous Comments:</strong></p>
-        <ul id="comments-list"></ul>
+        <ul>
+            ${data.comments.map(comment => `<li>${comment}</li>`).join('')}
+        </ul>
     `;
-
-    // Fetch the comments for this phone number from Supabase
-    const { data: comments, error } = await supabase
-        .from('phone_comments') // Your table name
-        .select('*')
-        .eq('phone_number', data.phone); // Filter by the phone number
-
-    if (error) {
-        console.error("Error fetching comments:", error);
-    } else {
-        const commentsList = document.getElementById("comments-list");
-        commentsList.innerHTML = comments.map(comment => `<li>${comment.comment}</li>`).join('');
-    }
 }
 
-// Save phone number to search history (display in history list)
+// Save search history
 function saveSearchHistory(phone) {
     const historyItem = document.createElement("li");
     historyItem.textContent = phone;
