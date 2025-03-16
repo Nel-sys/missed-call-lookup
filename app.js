@@ -1,6 +1,3 @@
-// Import Supabase Client
-const { createClient } = supabase;
-
 // Initialize Supabase with your project URL and API key
 const supabaseUrl = "https://mrshshpjrspcsfjfydnw.supabase.co"; // Replace with your Supabase URL
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yc2hzaHBqcnNwY3NmamZ5ZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyMTMsImV4cCI6MjA1NzcyNzIxM30.207BZGQvM9MJdQTPxfOAxYLYAHM5pKMaZ36WnBwGQR8"; // Replace with your Supabase anonymous API key
@@ -13,6 +10,33 @@ const searchResultsDiv = document.getElementById("search-results");
 const commentTextArea = document.getElementById("comment-text");
 const submitCommentBtn = document.getElementById("submit-comment");
 const historyList = document.getElementById("history-list");
+
+// Function to load search history from Supabase
+async function loadSearchHistory() {
+    const { data, error } = await supabase
+        .from('search_history')
+        .select('phone')
+        .order('timestamp', { ascending: false }) // Display most recent searches first
+        .limit(10); // Limit the number of history items
+
+    if (error) {
+        console.error("Error loading search history:", error.message);
+        return;
+    }
+
+    historyList.innerHTML = ''; // Clear current history
+    data.forEach(item => {
+        const historyItem = document.createElement('li');
+        historyItem.textContent = item.phone;
+        historyItem.addEventListener('click', () => {
+            displaySearchResults(item.phone);
+        });
+        historyList.appendChild(historyItem);
+    });
+}
+
+// Load search history on page load
+loadSearchHistory();
 
 // Event listener for search form submission
 searchForm.addEventListener("submit", async (e) => {
@@ -36,8 +60,9 @@ searchForm.addEventListener("submit", async (e) => {
         } else {
             alert("No results found.");
         }
-        
-        saveSearchHistory(phoneNumber);
+
+        // Save the search to the history in Supabase
+        await saveSearchHistory(phoneNumber);
     }
 });
 
@@ -59,13 +84,11 @@ submitCommentBtn.addEventListener("click", async () => {
         // Submit the comment to Supabase
         const { data, error } = await supabase
             .from('phone_comments')
-            .insert([
-                {
-                    phone: phoneNumber,
-                    comment: comment,
-                    user_id: userId
-                }
-            ]);
+            .insert([{
+                phone: phoneNumber,
+                comment: comment,
+                user_id: userId
+            }]);
 
         if (error) {
             alert("Failed to submit comment: " + error.message);
@@ -74,26 +97,52 @@ submitCommentBtn.addEventListener("click", async () => {
 
         alert("Comment submitted!");
         commentTextArea.value = ''; // Clear the comment box
+
+        // After submitting, update the history to show new comment
+        const updatedData = await supabase
+            .from('phone_comments')
+            .select('*')
+            .eq('phone', phoneNumber);
+        displaySearchResults(updatedData[0]); // Refresh the display with the new comment
     } else {
         alert("Please provide both a comment and a phone number.");
     }
 });
 
 // Function to display search results
-function displaySearchResults(data) {
-    searchResultsDiv.style.display = 'block';
-    searchResultsDiv.innerHTML = `
-        <p><strong>Phone Number:</strong> ${data.phone}</p>
-        <p><strong>Previous Comments:</strong></p>
-        <ul>
-            ${data.comments.map(comment => `<li>${comment}</li>`).join('')}
-        </ul>
-    `;
+function displaySearchResults(phone) {
+    // Fetch the results from Supabase
+    supabase
+        .from('phone_comments')
+        .select('*')
+        .eq('phone', phone)
+        .then(({ data, error }) => {
+            if (error) {
+                console.error("Error fetching phone comments:", error.message);
+                return;
+            }
+
+            searchResultsDiv.style.display = 'block';
+            searchResultsDiv.innerHTML = `
+                <p><strong>Phone Number:</strong> ${phone}</p>
+                <p><strong>Previous Comments:</strong></p>
+                <ul>
+                    ${data.map(comment => `<li>${comment.comment}</li>`).join('')}
+                </ul>
+            `;
+        });
 }
 
-// Function to save search history
-function saveSearchHistory(phone) {
-    const historyItem = document.createElement("li");
-    historyItem.textContent = phone;
-    historyList.appendChild(historyItem);
+// Function to save the search to the history in Supabase
+async function saveSearchHistory(phone) {
+    const { error } = await supabase
+        .from('search_history')
+        .upsert([{ phone }]); // Use upsert to add or update the phone number in the history
+
+    if (error) {
+        console.error("Error saving search history:", error.message);
+    }
+
+    // Reload the search history list
+    loadSearchHistory();
 }
