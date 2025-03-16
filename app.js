@@ -1,8 +1,12 @@
-// Initialize Supabase client
-const supabaseUrl = 'https://mrshshpjrspcsfjfydnw.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yc2hzaHBqcnNwY3NmamZ5ZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyMTMsImV4cCI6MjA1NzcyNzIxM30.207BZGQvM9MJdQTPxfOAxYLYAHM5pKMaZ36WnBwGQR8';
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+// Import Supabase Client
+const { createClient } = supabase;
 
+// Initialize Supabase with your project URL and API key
+const supabaseUrl = "https://mrshshpjrspcsfjfydnw.supabase.co"; // Replace with your Supabase URL
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yc2hzaHBqcnNwY3NmamZ5ZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyMTMsImV4cCI6MjA1NzcyNzIxM30.207BZGQvM9MJdQTPxfOAxYLYAHM5pKMaZ36WnBwGQR8"; // Replace with your Supabase anonymous API key
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Select elements from the DOM
 const searchForm = document.getElementById("search-form");
 const searchNumberInput = document.getElementById("search-number");
 const searchResultsDiv = document.getElementById("search-results");
@@ -10,71 +14,72 @@ const commentTextArea = document.getElementById("comment-text");
 const submitCommentBtn = document.getElementById("submit-comment");
 const historyList = document.getElementById("history-list");
 
-// Check if the user is logged in and get user details
-let userId = null;
-supabase.auth.onAuthStateChange((event, session) => {
-    if (session?.user) {
-        userId = session.user.id; // Store the user ID for submitting comments
-    } else {
-        alert('You need to log in to submit comments');
-    }
-});
-
-// Handle login and sign-up
-const loginUser = async (email, password) => {
-    const { user, error } = await supabase.auth.signIn({
-        email: email,
-        password: password
-    });
-    if (error) {
-        console.error('Login error:', error.message);
-    }
-    return user;
-};
-
-// Handle search form submission
+// Event listener for search form submission
 searchForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const phoneNumber = searchNumberInput.value.trim();
-
+    
     if (phoneNumber) {
+        // Fetch search results from Supabase
         const { data, error } = await supabase
             .from('phone_comments')
-            .select('phone, comment')
+            .select('*')
             .eq('phone', phoneNumber);
 
         if (error) {
-            console.error('Error fetching comments:', error.message);
-        } else {
-            displaySearchResults({ phone: phoneNumber, comments: data.map(d => d.comment) });
+            alert("Error fetching data: " + error.message);
+            return;
         }
 
+        if (data.length > 0) {
+            displaySearchResults(data[0]); // Show first result (or modify as needed)
+        } else {
+            alert("No results found.");
+        }
+        
         saveSearchHistory(phoneNumber);
     }
 });
 
-// Handle comment submission
+// Event listener for comment submission
 submitCommentBtn.addEventListener("click", async () => {
     const comment = commentTextArea.value.trim();
     const phoneNumber = searchNumberInput.value.trim();
 
-    if (comment && phoneNumber && userId) {
+    if (comment && phoneNumber) {
+        // Assuming you're using Supabase or similar for authentication
+        const user = await supabase.auth.getUser(); // Get authenticated user
+        const userId = user.data.id; // Get user ID, make sure the user is authenticated
+
+        if (!userId) {
+            alert("You must be logged in to submit a comment.");
+            return;
+        }
+
+        // Submit the comment to Supabase
         const { data, error } = await supabase
             .from('phone_comments')
-            .insert([{ phone: phoneNumber, comment: comment, user_id: userId }]);
+            .insert([
+                {
+                    phone: phoneNumber,
+                    comment: comment,
+                    user_id: userId
+                }
+            ]);
 
         if (error) {
-            console.error('Error submitting comment:', error.message);
-        } else {
-            alert("Comment submitted!");
-            commentTextArea.value = ''; // Clear comment box
+            alert("Failed to submit comment: " + error.message);
+            return;
         }
+
+        alert("Comment submitted!");
+        commentTextArea.value = ''; // Clear the comment box
     } else {
-        alert('Please log in to submit a comment.');
+        alert("Please provide both a comment and a phone number.");
     }
 });
 
-// Display search results
+// Function to display search results
 function displaySearchResults(data) {
     searchResultsDiv.style.display = 'block';
     searchResultsDiv.innerHTML = `
@@ -86,7 +91,7 @@ function displaySearchResults(data) {
     `;
 }
 
-// Save search history (just appends to a list in UI)
+// Function to save search history
 function saveSearchHistory(phone) {
     const historyItem = document.createElement("li");
     historyItem.textContent = phone;
