@@ -3,35 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Missed Call Number Search</title>
+    <title>Phone Comments - Search and Leave Comments for Phone Numbers</title>
+    <meta name="description" content="Search for phone numbers, read comments, and leave feedback on phone numbers. Find reviews and useful information about phone numbers.">
+    <meta name="keywords" content="phone comments, phone reviews, search phone numbers, phone feedback, number comments">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Phone Comments - Search and Leave Comments for Phone Numbers",
+        "description": "Search for phone numbers and leave user comments and feedback. Find useful reviews about phone numbers.",
+        "mainEntity": {
+            "@type": "WebSite",
+            "name": "Phone Comments",
+            "url": "https://yourwebsite.com",
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://yourwebsite.com/search?phone={search_term_string}",
+                "query-input": "required name=search_term_string"
+            }
+        }
+    }
+    </script>
+    
+    <!-- Link to CSS (ensure your path is correct) -->
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="app.js" defer></script>
 </head>
 <body>
-
     <div class="container">
-        <h1>Missed Call Number Search</h1>
+        <h1>Phone Comments</h1>
         
+        <!-- Search Form -->
         <form id="search-form">
             <input type="text" id="search-number" placeholder="Enter Phone Number" required>
             <button type="submit">Search</button>
         </form>
-        
-        <div id="search-results">
-            <!-- Search results will appear here -->
+
+        <!-- Search Results -->
+        <div id="search-results" style="display:none;">
+            <p><strong>Phone Number:</strong> <span id="result-phone"></span></p>
+            <p><strong>Previous Comments:</strong></p>
+            <ul id="result-comments"></ul>
         </div>
 
-        <div id="comments-section">
-            <h2>Leave a Comment</h2>
-            <textarea id="comment-text" placeholder="Write a comment..." rows="4" required></textarea>
-            <button id="submit-comment">Submit Comment</button>
-        </div>
+        <!-- Comment Section -->
+        <h2>Leave a Comment</h2>
+        <textarea id="comment-text" placeholder="Write your comment here"></textarea>
+        <button id="submit-comment">Submit Comment</button>
 
+        <!-- Search History (All users) -->
         <h2>Search History</h2>
-        <ul id="history-list">
-            <!-- Search history will be displayed here -->
-        </ul>
+        <ul id="history-list"></ul>
     </div>
 
-    <script src="app.js"></script>
+    <script>
+        // Initialize Supabase
+        const { createClient } = supabase;
+
+        // Supabase URL and Key (replace with your actual values)
+        const supabaseUrl = "https://mrshshpjrspcsfjfydnw.supabase.co";
+        const supabaseKey = "your_supabase_anon_key";
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        // Select DOM elements
+        const searchForm = document.getElementById("search-form");
+        const searchNumberInput = document.getElementById("search-number");
+        const searchResultsDiv = document.getElementById("search-results");
+        const resultPhone = document.getElementById("result-phone");
+        const resultComments = document.getElementById("result-comments");
+        const commentTextArea = document.getElementById("comment-text");
+        const submitCommentBtn = document.getElementById("submit-comment");
+        const historyList = document.getElementById("history-list");
+
+        // Event listener for search form submission
+        searchForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const phoneNumber = searchNumberInput.value.trim();
+            
+            if (phoneNumber) {
+                // Fetch search results from Supabase
+                const { data, error } = await supabase
+                    .from('phone_comments')
+                    .select('*')
+                    .eq('phone', phoneNumber);
+
+                if (error) {
+                    alert("Error fetching data: " + error.message);
+                    return;
+                }
+
+                if (data.length > 0) {
+                    displaySearchResults(data);
+                } else {
+                    alert("No results found.");
+                }
+
+                // Save search history to the database
+                const user = await supabase.auth.getUser();
+                if (user) {
+                    const { error } = await supabase
+                        .from('search_history')
+                        .insert([{ phone: phoneNumber, user_id: user.data.id }]);
+                    
+                    if (error) {
+                        console.log("Error saving search history:", error.message);
+                    }
+                }
+            }
+        });
+
+        // Event listener for comment submission
+        submitCommentBtn.addEventListener("click", async () => {
+            const comment = commentTextArea.value.trim();
+            const phoneNumber = searchNumberInput.value.trim();
+
+            if (comment && phoneNumber) {
+                const user = await supabase.auth.getUser();
+                const userId = user.data.id;
+
+                if (!userId) {
+                    alert("You must be logged in to submit a comment.");
+                    return;
+                }
+
+                const { data, error } = await supabase
+                    .from('phone_comments')
+                    .insert([{
+                        phone: phoneNumber,
+                        comment: comment,
+                        user_id: userId
+                    }]);
+
+                if (error) {
+                    alert("Failed to submit comment: " + error.message);
+                    return;
+                }
+
+                alert("Comment submitted!");
+                commentTextArea.value = ''; // Clear the comment box
+                displaySearchResults(data);
+            } else {
+                alert("Please provide both a comment and a phone number.");
+            }
+        });
+
+        // Function to display search results
+        function displaySearchResults(data) {
+            searchResultsDiv.style.display = 'block';
+            resultPhone.textContent = data[0].phone;
+            resultComments.innerHTML = data.map(comment => `<li>${comment.comment}</li>`).join('');
+        }
+
+        // Function to display search history (all users)
+        async function displaySearchHistory() {
+            const { data, error } = await supabase.from('search_history').select('*');
+            if (error) {
+                console.log("Error fetching search history:", error.message);
+                return;
+            }
+
+            historyList.innerHTML = '';
+            data.forEach(record => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `Phone Number: ${record.phone}, User: ${record.user_id}`;
+                historyList.appendChild(listItem);
+            });
+        }
+
+        displaySearchHistory();
+    </script>
 </body>
 </html>
