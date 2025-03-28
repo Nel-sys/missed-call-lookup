@@ -1,9 +1,9 @@
 // Initialize Supabase
 const { createClient } = supabase;
 
-// Supabase URL and Key (you can find this in your Supabase project settings)
-const supabaseUrl = "https://mrshshpjrspcsfjfydnw.supabase.co";  // Replace with your Supabase URL
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yc2hzaHBqcnNwY3NmamZ5ZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyMTMsImV4cCI6MjA1NzcyNzIxM30.207BZGQvM9MJdQTPxfOAxYLYAHM5pKMaZ36WnBwGQR8";  // Replace with your Supabase Anon Key
+// Supabase URL and Key (replace with your actual values)
+const supabaseUrl = "https://mrshshpjrspcsfjfydnw.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yc2hzaHBqcnNwY3NmamZ5ZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyMTMsImV4cCI6MjA1NzcyNzIxM30.207BZGQvM9MJdQTPxfOAxYLYAHM5pKMaZ36WnBwGQR8";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Select DOM elements
@@ -26,7 +26,7 @@ searchForm.addEventListener("submit", async (e) => {
         const { data, error } = await supabase
             .from('phone_comments')
             .select('*')
-            .eq('phone', phoneNumber);
+            .eq('phone', phoneNumber);  // Exact match (without `%`)
 
         if (error) {
             alert("Error fetching data: " + error.message);
@@ -56,6 +56,7 @@ submitCommentBtn.addEventListener("click", async () => {
     const phoneNumber = searchNumberInput.value.trim();
 
     if (comment && phoneNumber) {
+        // Insert comment into the phone_comments table
         const { data, error } = await supabase
             .from('phone_comments')
             .insert([{
@@ -70,19 +71,7 @@ submitCommentBtn.addEventListener("click", async () => {
 
         alert("Comment submitted!");
         commentTextArea.value = ''; // Clear the comment box
-
-        // Fetch and display updated comments
-        const { data: updatedData, error: updatedError } = await supabase
-            .from('phone_comments')
-            .select('*')
-            .eq('phone', phoneNumber);
-
-        if (updatedError) {
-            alert("Error fetching updated comments: " + updatedError.message);
-            return;
-        }
-
-        displaySearchResults(updatedData);
+        displaySearchResults(data);  // Refresh the comments section
     } else {
         alert("Please provide both a comment and a phone number.");
     }
@@ -111,4 +100,5 @@ async function displaySearchHistory() {
     });
 }
 
+// Display search history when the page loads
 displaySearchHistory();
