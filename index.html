@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Phone Commenter</title>
-  <!-- Add the Supabase CDN script here -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -14,11 +13,10 @@
   <!-- Phone Number Search Input -->
   <label for="phoneNumber">Enter Phone Number:</label>
   <input type="text" id="phoneNumber" placeholder="Enter phone number">
-  
   <button id="searchButton">Search</button>
 
   <h2>Comments for Phone Number</h2>
-  <div id="commentsContainer"></div>
+  <div id="commentsContainer">No comments yet</div>
 
   <!-- Comment Input -->
   <h3>Leave a Comment:</h3>
