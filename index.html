@@ -8,22 +8,23 @@
 </head>
 <body>
   <div class="container">
-    <h1>Leave a Comment for a Phone Number</h1>
+    <h1>Phone Number Comment System</h1>
 
+    <!-- Submit Comment Form -->
     <form id="phoneCommentForm">
-      <label for="phoneComment">Enter Phone Number and Comment (e.g., 1234567890: Your comment)</label>
-      <input type="text" id="phoneComment" name="phoneComment" placeholder="e.g., 1234567890: Your comment" required />
+      <label for="phoneComment">Enter Phone Number and Comment:</label>
+      <input type="text" id="phoneComment" placeholder="PhoneNumber: Your Comment" required />
       <button type="submit">Submit</button>
     </form>
 
-    <div id="commentsContainer">
-      <h2>Comments for a Phone Number</h2>
-      <label for="searchPhone">Search by Phone Number:</label>
+    <!-- Search Comments -->
+    <div>
+      <label for="searchPhone">Search for Comments by Phone Number:</label>
       <input type="text" id="searchPhone" placeholder="Enter phone number to search" />
       <button id="searchButton">Search</button>
-
-      <div id="commentsList"></div>
     </div>
+
+    <div id="commentsList"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
