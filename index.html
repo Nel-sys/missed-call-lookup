@@ -3,31 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Phone Number Comment System</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Phone Comments</title>
 </head>
 <body>
-  <div class="container">
-    <h1>Phone Number Comment System</h1>
 
-    <!-- Submit Comment Form -->
-    <form id="phoneCommentForm">
-      <label for="phoneComment">Enter Phone Number and Comment:</label>
-      <input type="text" id="phoneComment" placeholder="PhoneNumber: Your Comment" required />
-      <button type="submit">Submit</button>
-    </form>
+  <h1>Phone Number Comments</h1>
 
-    <!-- Search Comments -->
-    <div>
-      <label for="searchPhone">Search for Comments by Phone Number:</label>
-      <input type="text" id="searchPhone" placeholder="Enter phone number to search" />
-      <button id="searchButton">Search</button>
-    </div>
+  <!-- Input to search by phone number -->
+  <label for="phoneInput">Enter Phone Number:</label>
+  <input type="text" id="phoneInput" placeholder="Search by Phone Number" />
 
-    <div id="commentsList"></div>
-  </div>
+  <!-- Display the comments related to the phone number -->
+  <div id="commentsDisplay"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <!-- Input to submit a new comment -->
+  <label for="commentInput">Leave a Comment:</label>
+  <textarea id="commentInput" placeholder="Write your comment"></textarea>
+
+  <!-- Button to submit the comment -->
+  <button id="submitComment">Submit Comment</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/supabase.js"></script>
   <script src="app.js"></script>
+
 </body>
 </html>
