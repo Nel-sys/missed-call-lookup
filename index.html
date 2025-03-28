@@ -3,30 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Phone Comment System</title>
+  <title>Phone Commenter</title>
+  <!-- Add the Supabase CDN script here -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Phone Comment System</h1>
+  <h1>Phone Number Comment System</h1>
+
+  <!-- Phone Number Search Input -->
+  <label for="phoneNumber">Enter Phone Number:</label>
+  <input type="text" id="phoneNumber" placeholder="Enter phone number">
   
-  <!-- Search for a phone number -->
-  <form id="searchForm">
-    <label for="phoneSearch">Search by Phone Number:</label>
-    <input type="text" id="phoneSearch" name="phoneSearch" placeholder="Enter phone number">
-    <button type="submit">Search</button>
-  </form>
+  <button id="searchButton">Search</button>
 
-  <!-- Display existing comments -->
-  <div id="commentsContainer">
-    <p>No comments yet.</p>
-  </div>
+  <h2>Comments for Phone Number</h2>
+  <div id="commentsContainer"></div>
 
-  <!-- Leave a new comment -->
-  <form id="commentForm">
-    <label for="comment">Leave your comment:</label>
-    <textarea id="comment" name="comment" placeholder="Enter your comment"></textarea>
-    <button type="submit">Submit Comment</button>
-  </form>
+  <!-- Comment Input -->
+  <h3>Leave a Comment:</h3>
+  <textarea id="userComment" placeholder="Leave a comment about this number"></textarea>
+  <button id="submitComment">Submit Comment</button>
 
   <script src="app.js"></script>
 </body>
