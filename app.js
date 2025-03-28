@@ -87,18 +87,20 @@ function displaySearchResults(data) {
 
 // Function to display search history (all users)
 async function displaySearchHistory() {
-    const { data, error } = await supabase.from('search_history').select('*');
+    const { data, error } = await supabase
+        .from('search_history')
+        .select('*')
+        .order('created_at', { ascending: false });
+
     if (error) {
         console.log("Error fetching search history:", error.message);
         return;
     }
 
-    historyList.innerHTML = '';
-    data.forEach(record => {
-        const listItem = document.createElement('li');
-        listItem.textContent = `Phone Number: ${record.phone}`;
-        historyList.appendChild(listItem);
-    });
+    historyList.innerHTML = data.map(record => `<li>${record.phone}</li>`).join('');
 }
 
-displaySearchHistory();
+// Run on page load
+document.addEventListener("DOMContentLoaded", () => {
+    displaySearchHistory();
+});
