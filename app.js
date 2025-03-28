@@ -24,7 +24,7 @@ searchForm.addEventListener("submit", async (e) => {
         const { data, error } = await supabase
             .from('phone_comments')
             .select('*')
-            .eq('phone', phoneNumber);
+.ilike('phone', `%${phoneNumber}%`); 
 
         if (error) {
             alert("Error fetching data: " + error.message);
