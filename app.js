@@ -1,81 +1,66 @@
-// Initialize Supabase client
-const supabase = createClient('https://mrshshpjrspcsfjfydnw.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yc2hzaHBqcnNwY3NmamZ5ZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyMTMsImV4cCI6MjA1NzcyNzIxM30.207BZGQvM9MJdQTPxfOAxYLYAHM5pKMaZ36WnBwGQR8');
+// Supabase client setup
+const supabaseUrl = 'https://mrshshpjrspcsfjfydnw.supabase.co'; // Replace with your Supabase URL
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yc2hzaHBqcnNwY3NmamZ5ZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyMTMsImV4cCI6MjA1NzcyNzIxM30.207BZGQvM9MJdQTPxfOAxYLYAHM5pKMaZ36WnBwGQR8'; // Replace with your Supabase anon key
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-// Function to get comments for the phone number
-const getCommentsForPhoneNumber = async (phoneNumber) => {
+// Function to fetch comments based on phone number
+async function fetchComments(phoneNumber) {
   const { data, error } = await supabase
     .from('phone_comments')
-    .select('*')
-    .eq('phone_number', phoneNumber); // Look for this exact number in the database
-
+    .select('comment')
+    .eq('phone_number', phoneNumber);  // Fetch comments for the specific phone number
+  
   if (error) {
-    console.error(error);
-    return [];
-  }
-
-  return data;
-};
-
-// Function to handle search form submission
-const handleSearch = async (event) => {
-  event.preventDefault();
-  
-  const phoneNumber = document.getElementById('phoneSearch').value;
-  
-  if (!phoneNumber) {
-    alert('Please enter a phone number');
+    console.error('Error fetching comments:', error);
     return;
   }
 
-  // Fetch comments from Supabase
-  const comments = await getCommentsForPhoneNumber(phoneNumber);
-  displayComments(comments);
-};
+  const commentsContainer = document.getElementById('commentsContainer');
+  commentsContainer.innerHTML = ''; // Clear existing comments
 
-// Function to handle comment submission
-const handleCommentSubmission = async (event) => {
-  event.preventDefault();
-
-  const phoneNumber = document.getElementById('phoneSearch').value;
-  const comment = document.getElementById('comment').value;
-
-  if (!comment) {
-    alert('Please enter a comment');
-    return;
+  if (data && data.length > 0) {
+    data.forEach(comment => {
+      const commentElement = document.createElement('p');
+      commentElement.textContent = comment.comment;
+      commentsContainer.appendChild(commentElement);
+    });
+  } else {
+    commentsContainer.textContent = 'No comments found for this number.';
   }
+}
 
-  // Insert the comment into Supabase
+// Handle the search button click
+document.getElementById('searchButton').addEventListener('click', () => {
+  const phoneNumber = document.getElementById('phoneNumber').value;
+  if (phoneNumber) {
+    fetchComments(phoneNumber);
+  }
+});
+
+// Function to submit a new comment
+async function submitComment(phoneNumber, userComment) {
   const { data, error } = await supabase
     .from('phone_comments')
     .insert([
-      { phone_number: phoneNumber, comment: comment }
+      { phone_number: phoneNumber, comment: userComment }
     ]);
-
-  if (error) {
-    console.error(error);
-  } else {
-    alert('Comment added successfully!');
-    document.getElementById('comment').value = ''; // Clear the comment field
-    displayComments(await getCommentsForPhoneNumber(phoneNumber)); // Refresh the comments list
-  }
-};
-
-// Function to display comments
-const displayComments = (comments) => {
-  const commentsContainer = document.getElementById('commentsContainer');
-  commentsContainer.innerHTML = ''; // Clear the existing comments
   
-  if (comments.length === 0) {
-    commentsContainer.innerHTML = 'No comments found for this number.';
+  if (error) {
+    console.error('Error inserting comment:', error);
   } else {
-    comments.forEach((comment) => {
-      const commentElement = document.createElement('div');
-      commentElement.textContent = `${comment.created_at}: ${comment.comment}`;
-      commentsContainer.appendChild(commentElement);
-    });
+    console.log('Comment inserted successfully:', data);
+    fetchComments(phoneNumber);  // Reload the comments after insertion
   }
-};
+}
 
-// Add event listeners
-document.getElementById('searchForm').addEventListener('submit', handleSearch);
-document.getElementById('commentForm').addEventListener('submit', handleCommentSubmission);
+// Handle the submit comment button click
+document.getElementById('submitComment').addEventListener('click', () => {
+  const phoneNumber = document.getElementById('phoneNumber').value;
+  const userComment = document.getElementById('userComment').value;
+
+  if (phoneNumber && userComment) {
+    submitComment(phoneNumber, userComment);
+  } else {
+    alert('Please enter both a phone number and a comment.');
+  }
+});
