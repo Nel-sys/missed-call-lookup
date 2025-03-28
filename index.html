@@ -1,61 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phone Comments - Search and Leave Comments for Phone Numbers</title>
-    <meta name="description" content="Search for phone numbers, read comments, and leave feedback on phone numbers. Find reviews and useful information about phone numbers.">
-    <meta name="keywords" content="phone comments, phone reviews, search phone numbers, phone feedback, number comments">
-    <meta name="robots" content="index, follow">
-
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebPage",
-        "name": "Phone Comments - Search and Leave Comments for Phone Numbers",
-        "description": "Search for phone numbers and leave user comments and feedback. Find useful reviews about phone numbers.",
-        "mainEntity": {
-            "@type": "WebSite",
-            "name": "Phone Comments",
-            "url": "https://yourwebsite.com",
-            "potentialAction": {
-                "@type": "SearchAction",
-                "target": "https://yourwebsite.com/search?phone={search_term_string}",
-                "query-input": "required name=search_term_string"
-            }
-        }
-    }
-    </script>
-
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-    <script src="app.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phone Number Comment System</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Phone Comments</h1>
-        
-        <!-- Search Form -->
-        <form id="search-form">
-            <input type="text" id="search-number" placeholder="Enter Phone Number" required>
-            <button type="submit">Search</button>
-        </form>
+  <div class="container">
+    <h1>Leave a Comment for a Phone Number</h1>
 
-        <!-- Search Results -->
-        <div id="search-results" style="display:none;">
-            <p><strong>Phone Number:</strong> <span id="result-phone"></span></p>
-            <p><strong>Previous Comments:</strong></p>
-            <ul id="result-comments"></ul>
-        </div>
+    <form id="phoneCommentForm">
+      <label for="phoneComment">Enter Phone Number and Comment (e.g., 1234567890: Your comment)</label>
+      <input type="text" id="phoneComment" name="phoneComment" placeholder="e.g., 1234567890: Your comment" required />
+      <button type="submit">Submit</button>
+    </form>
 
-        <!-- Comment Section -->
-        <h2>Leave a Comment</h2>
-        <textarea id="comment-text" placeholder="Write your comment here"></textarea>
-        <button id="submit-comment">Submit Comment</button>
+    <div id="commentsContainer">
+      <h2>Comments for a Phone Number</h2>
+      <label for="searchPhone">Search by Phone Number:</label>
+      <input type="text" id="searchPhone" placeholder="Enter phone number to search" />
+      <button id="searchButton">Search</button>
 
-        <!-- Search History (All users) -->
-        <h2>Search History</h2>
-        <ul id="history-list"></ul>
+      <div id="commentsList"></div>
     </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
