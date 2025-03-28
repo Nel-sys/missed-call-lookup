@@ -44,6 +44,7 @@ button:hover {
     background-color: #0056b3;
 }
 
+/* Search Results */
 #search-results {
     margin-top: 20px;
     padding: 15px;
@@ -55,4 +56,41 @@ button:hover {
 #history-list {
     list-style-type: none;
     padding: 0;
+}
+
+#history-list li {
+    background-color: #e9ecef;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+#history-list li:hover {
+    background-color: #d6d8db;
+}
+
+/* Comments Section */
+ul#result-comments {
+    padding: 0;
+    list-style-type: none;
+}
+
+ul#result-comments li {
+    background-color: #f1f1f1;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+ul#result-comments li strong {
+    color: #007BFF;
+}
+
+/* Input fields and buttons */
+textarea {
+    font-size: 14px;
+    height: 100px;
+    resize: none;
 }
