@@ -6,11 +6,10 @@ const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 // Elements
 const phoneCommentForm = document.querySelector('#phoneCommentForm');
 const phoneCommentInput = document.querySelector('#phoneComment');
-const commentsContainer = document.querySelector('#commentsList');
 const searchPhoneInput = document.querySelector('#searchPhone');
-const searchButton = document.querySelector('#searchButton');
+const commentsList = document.querySelector('#commentsList');
 
-// Submit comment function
+// Submit comment
 phoneCommentForm.addEventListener('submit', async function (event) {
   event.preventDefault();
 
@@ -37,8 +36,8 @@ phoneCommentForm.addEventListener('submit', async function (event) {
   }
 });
 
-// Search function to find comments by phone number
-searchButton.addEventListener('click', async () => {
+// Search for comments by phone number
+document.querySelector('#searchButton').addEventListener('click', async () => {
   const phoneNumberToSearch = searchPhoneInput.value.trim();
 
   if (!phoneNumberToSearch) {
@@ -59,17 +58,17 @@ searchButton.addEventListener('click', async () => {
   }
 
   // Clear previous results
-  commentsContainer.innerHTML = '';
+  commentsList.innerHTML = '';
 
   if (data.length === 0) {
-    commentsContainer.innerHTML = `<p>No comments found for ${phoneNumberToSearch}.</p>`;
+    commentsList.innerHTML = `<p>No comments found for ${phoneNumberToSearch}.</p>`;
   } else {
-    const commentsList = document.createElement('ul');
+    const commentsUl = document.createElement('ul');
     data.forEach(comment => {
       const commentItem = document.createElement('li');
       commentItem.textContent = comment.comment;
-      commentsList.appendChild(commentItem);
+      commentsUl.appendChild(commentItem);
     });
-    commentsContainer.appendChild(commentsList);
+    commentsList.appendChild(commentsUl);
   }
 });
