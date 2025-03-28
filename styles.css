@@ -1,41 +1,64 @@
 body {
   font-family: Arial, sans-serif;
-  margin: 20px;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  width: 80%;
+  max-width: 600px;
+  margin: 50px auto;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
-  color: #4CAF50;
+  text-align: center;
+  color: #333;
 }
 
-label, h2, h3 {
-  font-size: 18px;
+label {
+  font-size: 16px;
+  color: #333;
 }
 
 input[type="text"], textarea {
-  width: 300px;
-  padding: 8px;
-  margin-bottom: 10px;
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 button {
-  padding: 10px 20px;
-  background-color: #4CAF50;
+  background-color: #007bff;
   color: white;
+  padding: 10px 20px;
   border: none;
+  border-radius: 5px;
   cursor: pointer;
+  font-size: 16px;
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: #0056b3;
 }
 
-#commentsContainer {
-  margin-top: 20px;
+#commentSection {
+  margin-top: 30px;
 }
 
-#commentsContainer p {
+#searchResults ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+#searchResults li {
+  padding: 8px;
   background-color: #f1f1f1;
-  padding: 10px;
-  margin-bottom: 5px;
-  border-radius: 5px;
+  margin: 5px 0;
+  border-radius: 4px;
 }
