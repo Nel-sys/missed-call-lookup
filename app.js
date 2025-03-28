@@ -22,11 +22,11 @@ searchForm.addEventListener("submit", async (e) => {
     const phoneNumber = searchNumberInput.value.trim();
     
     if (phoneNumber) {
-        // Fetch search results from Supabase (matches the exact phone number)
+        // Fetch search results from Supabase
         const { data, error } = await supabase
             .from('phone_comments')
             .select('*')
-            .eq('phone', phoneNumber);  // Exact match (without `%`)
+            .eq('phone', phoneNumber);
 
         if (error) {
             alert("Error fetching data: " + error.message);
@@ -40,15 +40,12 @@ searchForm.addEventListener("submit", async (e) => {
         }
 
         // Save search history to the database
-        const user = await supabase.auth.getUser();
-        if (user) {
-            const { error: historyError } = await supabase
-                .from('search_history')
-                .insert([{ phone: phoneNumber, user_id: user.data.id }]);
-            
-            if (historyError) {
-                console.log("Error saving search history:", historyError.message);
-            }
+        const { error: searchError } = await supabase
+            .from('search_history')
+            .insert([{ phone: phoneNumber }]);
+        
+        if (searchError) {
+            console.log("Error saving search history:", searchError.message);
         }
     }
 });
@@ -59,20 +56,11 @@ submitCommentBtn.addEventListener("click", async () => {
     const phoneNumber = searchNumberInput.value.trim();
 
     if (comment && phoneNumber) {
-        const user = await supabase.auth.getUser();
-        const userId = user.data.id;
-
-        if (!userId) {
-            alert("You must be logged in to submit a comment.");
-            return;
-        }
-
         const { data, error } = await supabase
             .from('phone_comments')
             .insert([{
                 phone: phoneNumber,
-                comment: comment,
-                user_id: userId
+                comment: comment
             }]);
 
         if (error) {
@@ -82,7 +70,19 @@ submitCommentBtn.addEventListener("click", async () => {
 
         alert("Comment submitted!");
         commentTextArea.value = ''; // Clear the comment box
-        displaySearchResults(data);  // Refresh the search results with the new comment
+
+        // Fetch and display updated comments
+        const { data: updatedData, error: updatedError } = await supabase
+            .from('phone_comments')
+            .select('*')
+            .eq('phone', phoneNumber);
+
+        if (updatedError) {
+            alert("Error fetching updated comments: " + updatedError.message);
+            return;
+        }
+
+        displaySearchResults(updatedData);
     } else {
         alert("Please provide both a comment and a phone number.");
     }
@@ -111,5 +111,4 @@ async function displaySearchHistory() {
     });
 }
 
-// Call displaySearchHistory on page load to show past searches
 displaySearchHistory();
