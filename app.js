@@ -1,9 +1,9 @@
 // Supabase client setup
-const supabaseUrl = 'https://mrshshpjrspcsfjfydnw.supabase.co'; // Replace with your Supabase URL
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yc2hzaHBqcnNwY3NmamZ5ZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyMTMsImV4cCI6MjA1NzcyNzIxM30.207BZGQvM9MJdQTPxfOAxYLYAHM5pKMaZ36WnBwGQR8'; // Replace with your Supabase anon key
+const supabaseUrl = 'https://mrshshpjrspcsfjfydnw.supabase.co'; 
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yc2hzaHBqcnNwY3NmamZ5ZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyMTMsImV4cCI6MjA1NzcyNzIxM30.207BZGQvM9MJdQTPxfOAxYLYAHM5pKMaZ36WnBwGQR8'; y
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-// Function to search for phone number comments
+
 async function searchPhoneNumber() {
   const phoneNumber = document.getElementById('searchPhone').value.trim();
   if (phoneNumber === "") {
@@ -11,7 +11,7 @@ async function searchPhoneNumber() {
     return;
   }
 
-  // Query the Supabase table to get comments for the phone number
+  
   const { data, error } = await supabase
     .from('phone_comments')
     .select('*')
@@ -23,7 +23,7 @@ async function searchPhoneNumber() {
   }
 
   const searchResultsDiv = document.getElementById('searchResults');
-  searchResultsDiv.innerHTML = ''; // Clear previous results
+  searchResultsDiv.innerHTML = ''; 
 
   if (data.length === 0) {
     searchResultsDiv.innerHTML = `<p>No comments found for this phone number.</p>`;
@@ -35,12 +35,12 @@ async function searchPhoneNumber() {
       commentList.appendChild(listItem);
     });
     searchResultsDiv.appendChild(commentList);
-    // Show the comment section to submit a new comment
+
     document.getElementById('commentSection').style.display = 'block';
   }
 }
 
-// Function to submit a comment
+
 async function submitComment() {
   const phoneNumber = document.getElementById('searchPhone').value.trim();
   const userComment = document.getElementById('userComment').value.trim();
@@ -50,7 +50,7 @@ async function submitComment() {
     return;
   }
 
-  // Insert the comment into the database
+ 
   const { data, error } = await supabase
     .from('phone_comments')
     .insert([
@@ -62,8 +62,8 @@ async function submitComment() {
     return;
   }
 
-  // Show success message and reset the input fields
+
   alert("Comment submitted successfully!");
   document.getElementById('userComment').value = '';
-  searchPhoneNumber();  // Refresh the comments after submission
+  searchPhoneNumber();  
 }
