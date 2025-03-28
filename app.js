@@ -1,6 +1,8 @@
 // Initialize Supabase
 const { createClient } = supabase;
-const supabaseUrl = "https://mrshshpjrspcsfjfydnw.supabase.co;  // Replace with your Supabase URL
+
+// Supabase URL and Key (you can find this in your Supabase project settings)
+const supabaseUrl = "https://mrshshpjrspcsfjfydnw.supabase.co";  // Replace with your Supabase URL
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yc2hzaHBqcnNwY3NmamZ5ZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyMTMsImV4cCI6MjA1NzcyNzIxM30.207BZGQvM9MJdQTPxfOAxYLYAHM5pKMaZ36WnBwGQR8";  // Replace with your Supabase Anon Key
 const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -20,11 +22,11 @@ searchForm.addEventListener("submit", async (e) => {
     const phoneNumber = searchNumberInput.value.trim();
     
     if (phoneNumber) {
-        // Fetch search results from Supabase (matches similar numbers)
+        // Fetch search results from Supabase (matches the exact phone number)
         const { data, error } = await supabase
             .from('phone_comments')
             .select('*')
-            .ilike('phone', `${phoneNumber}%`);  // This will match phone numbers starting with the same digits
+            .eq('phone', phoneNumber);  // Exact match (without `%`)
 
         if (error) {
             alert("Error fetching data: " + error.message);
@@ -37,13 +39,16 @@ searchForm.addEventListener("submit", async (e) => {
             alert("No results found.");
         }
 
-        // Save search history to the database (no user_id needed here)
-        const { error: searchError } = await supabase
-            .from('search_history')
-            .insert([{ phone: phoneNumber }]);
-        
-        if (searchError) {
-            console.log("Error saving search history:", searchError.message);
+        // Save search history to the database
+        const user = await supabase.auth.getUser();
+        if (user) {
+            const { error: historyError } = await supabase
+                .from('search_history')
+                .insert([{ phone: phoneNumber, user_id: user.data.id }]);
+            
+            if (historyError) {
+                console.log("Error saving search history:", historyError.message);
+            }
         }
     }
 });
@@ -62,7 +67,6 @@ submitCommentBtn.addEventListener("click", async () => {
             return;
         }
 
-        // Insert comment into the database
         const { data, error } = await supabase
             .from('phone_comments')
             .insert([{
@@ -78,7 +82,7 @@ submitCommentBtn.addEventListener("click", async () => {
 
         alert("Comment submitted!");
         commentTextArea.value = ''; // Clear the comment box
-        displaySearchResults(data); // Update the search results with the new comment
+        displaySearchResults(data);  // Refresh the search results with the new comment
     } else {
         alert("Please provide both a comment and a phone number.");
     }
@@ -107,4 +111,5 @@ async function displaySearchHistory() {
     });
 }
 
+// Call displaySearchHistory on page load to show past searches
 displaySearchHistory();
