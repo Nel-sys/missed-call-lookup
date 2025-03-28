@@ -1,65 +1,42 @@
+/* Basic styling for the page */
 body {
   font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  margin: 20px;
 }
 
-.container {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 600px;
+h1 {
+  color: #4CAF50;
 }
 
-form,
-div {
-  margin-bottom: 20px;
+label, h2, h3 {
+  font-size: 18px;
 }
 
-input {
-  padding: 10px;
-  width: 80%;
-  max-width: 400px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+input[type="text"], textarea {
+  width: 300px;
+  padding: 8px;
+  margin-bottom: 10px;
 }
 
 button {
   padding: 10px 20px;
-  background-color: #007bff;
+  background-color: #4CAF50;
   color: white;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #45a049;
 }
 
-#commentsList {
+#commentsContainer {
   margin-top: 20px;
-  text-align: left;
-  width: 80%;
-  max-width: 400px;
 }
 
-#commentsList ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-#commentsList li {
+#commentsContainer p {
+  background-color: #f1f1f1;
   padding: 10px;
-  background-color: #f9f9f9;
-  margin-bottom: 10px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
+  margin-bottom: 5px;
+  border-radius: 5px;
 }
