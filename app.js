@@ -1,15 +1,15 @@
 // Initialize Supabase
 const { createClient } = supabase;
-
-// Supabase URL and Key (replace with your actual values)
-const supabaseUrl = "https://mrshshpjrspcsfjfydnw.supabase.co";
-const supabaseKey = "your_supabase_anon_key";
+const supabaseUrl = "https://mrshshpjrspcsfjfydnw.supabase.co";  // Replace with your Supabase URL
+const supabaseKey = "your_supabase_anon_key";  // Replace with your Supabase Anon Key
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Select DOM elements
 const searchForm = document.getElementById("search-form");
 const searchNumberInput = document.getElementById("search-number");
 const searchResultsDiv = document.getElementById("search-results");
+const resultPhone = document.getElementById("result-phone");
+const resultComments = document.getElementById("result-comments");
 const commentTextArea = document.getElementById("comment-text");
 const submitCommentBtn = document.getElementById("submit-comment");
 const historyList = document.getElementById("history-list");
@@ -18,13 +18,13 @@ const historyList = document.getElementById("history-list");
 searchForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const phoneNumber = searchNumberInput.value.trim();
-
+    
     if (phoneNumber) {
-        // Fetch search results (including similar numbers)
+        // Fetch search results from Supabase (matches similar numbers)
         const { data, error } = await supabase
             .from('phone_comments')
             .select('*')
-            .ilike('phone', `%${phoneNumber}%`); // Partial match for similar numbers
+            .ilike('phone', `${phoneNumber}%`);  // This will match phone numbers starting with the same digits
 
         if (error) {
             alert("Error fetching data: " + error.message);
@@ -34,15 +34,14 @@ searchForm.addEventListener("submit", async (e) => {
         if (data.length > 0) {
             displaySearchResults(data);
         } else {
-            searchResultsDiv.innerHTML = "<p>No results found.</p>";
-            searchResultsDiv.style.display = 'block';
+            alert("No results found.");
         }
 
-        // Save search history (without requiring login)
+        // Save search history to the database (no user_id needed here)
         const { error: searchError } = await supabase
             .from('search_history')
             .insert([{ phone: phoneNumber }]);
-
+        
         if (searchError) {
             console.log("Error saving search history:", searchError.message);
         }
@@ -55,9 +54,22 @@ submitCommentBtn.addEventListener("click", async () => {
     const phoneNumber = searchNumberInput.value.trim();
 
     if (comment && phoneNumber) {
+        const user = await supabase.auth.getUser();
+        const userId = user.data.id;
+
+        if (!userId) {
+            alert("You must be logged in to submit a comment.");
+            return;
+        }
+
+        // Insert comment into the database
         const { data, error } = await supabase
             .from('phone_comments')
-            .insert([{ phone: phoneNumber, comment: comment }]);
+            .insert([{
+                phone: phoneNumber,
+                comment: comment,
+                user_id: userId
+            }]);
 
         if (error) {
             alert("Failed to submit comment: " + error.message);
@@ -66,42 +78,33 @@ submitCommentBtn.addEventListener("click", async () => {
 
         alert("Comment submitted!");
         commentTextArea.value = ''; // Clear the comment box
-        displaySearchResults([{ phone: phoneNumber, comment: comment }]); // Update UI
+        displaySearchResults(data); // Update the search results with the new comment
     } else {
         alert("Please provide both a comment and a phone number.");
     }
 });
 
-// Function to display search results (now includes all similar numbers)
+// Function to display search results
 function displaySearchResults(data) {
     searchResultsDiv.style.display = 'block';
-    searchResultsDiv.innerHTML = `
-        <h3>Search Results</h3>
-        ${data.map(item => `
-            <div class="result-item">
-                <p><strong>Phone:</strong> ${item.phone}</p>
-                <p><strong>Comment:</strong> ${item.comment}</p>
-            </div>
-        `).join('')}
-    `;
+    resultPhone.textContent = data[0].phone;
+    resultComments.innerHTML = data.map(comment => `<li>${comment.comment}</li>`).join('');
 }
 
-// Function to display search history on page load
+// Function to display search history (all users)
 async function displaySearchHistory() {
-    const { data, error } = await supabase
-        .from('search_history')
-        .select('*')
-        .order('created_at', { ascending: false });
-
+    const { data, error } = await supabase.from('search_history').select('*');
     if (error) {
         console.log("Error fetching search history:", error.message);
         return;
     }
 
-    historyList.innerHTML = data.map(record => `<li>${record.phone}</li>`).join('');
+    historyList.innerHTML = '';
+    data.forEach(record => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `Phone Number: ${record.phone}`;
+        historyList.appendChild(listItem);
+    });
 }
 
-// Load previous searches when the page loads
-document.addEventListener("DOMContentLoaded", () => {
-    displaySearchHistory();
-});
+displaySearchHistory();
