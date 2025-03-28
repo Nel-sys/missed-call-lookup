@@ -1,7 +1,7 @@
 // Initialize Supabase
 const { createClient } = supabase;
-const supabaseUrl = "https://mrshshpjrspcsfjfydnw.supabase.co";  // Replace with your Supabase URL
-const supabaseKey = "your_supabase_anon_key";  // Replace with your Supabase Anon Key
+const supabaseUrl = "https://mrshshpjrspcsfjfydnw.supabase.co;  // Replace with your Supabase URL
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yc2hzaHBqcnNwY3NmamZ5ZG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyMTMsImV4cCI6MjA1NzcyNzIxM30.207BZGQvM9MJdQTPxfOAxYLYAHM5pKMaZ36WnBwGQR8";  // Replace with your Supabase Anon Key
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Select DOM elements
